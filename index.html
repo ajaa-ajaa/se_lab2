@@ -2,37 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SE5-Lab2: showDentistProfile() Test Harness</title>
+<title>Dentist Profile - Original Design</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  body { padding: 30px; background: #f5f7fa; }
-  .test-card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-  pre { background: #f4f4f4; padding: 10px; border-radius: 6px; font-size: 0.8rem; }
+  body { padding: 50px; background: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  .profile-card { background: white; border-radius: 10px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1 class="mb-4">SE5-Lab2 — <code>showDentistProfile()</code></h1>
-  <p class="text-muted">Click a test case below, then click <strong>Show Profile</strong> and verify the modal matches the expected output in the README.</p>
-
-  <div class="test-card">
-    <h5>Test cases</h5>
-    <button class="btn btn-outline-primary btn-sm mb-2" onclick="loadCase(0)">Case 1: Full data</button>
-    <button class="btn btn-outline-primary btn-sm mb-2" onclick="loadCase(1)">Case 2: Missing optional fields</button>
-    <button class="btn btn-outline-primary btn-sm mb-2" onclick="loadCase(2)">Case 3: Partial schedule</button>
-    <button class="btn btn-outline-danger btn-sm mb-2" onclick="loadCase(3)">Edge: 00:00:00 times</button>
-    <hr>
-    <button class="btn btn-success" onclick="showDentistProfile()">
-      <i class="fas fa-address-card"></i> Show Profile
+<div class="profile-card">
+  <h4 class="mb-4" style="color: #00695C;"><i class="fas fa-tooth me-2"></i> Dentist Information</h4>
+  
+  <div class="d-flex align-items-center p-3 bg-light rounded-3 border">
+    <i class="fas fa-user-md text-primary me-2 fs-4"></i>
+    <div>
+      <span class="fw-bold d-block">Dr. John Smith</span>
+      <span class="text-muted small">Orthodontics</span>
+    </div>
+    <!-- The button that triggers the function -->
+    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill ms-auto" id="viewProfileBtn" onclick="showDentistProfile()">
+      <i class="fas fa-address-card"></i> View Profile
     </button>
-    <div id="currentCase" class="mt-2 text-muted small"></div>
-  </div>
-
-  <div class="test-card">
-    <h5>Mock data currently loaded</h5>
-    <pre id="dataPreview"></pre>
   </div>
 </div>
 
@@ -54,65 +46,32 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ============================================================
-// Test fixtures
-// ============================================================
-const testCases = [
-  {
-    label: "Case 1: Full data",
-    dentist: {
-      first_name: "John", last_name: "Smith", specialization: "Orthodontics",
-      license_number: "LIC123", years_of_experience: 10, education: "DMD",
-      clinic_name: "Smile Clinic", clinic_address: "123 Main St", clinic_phone: "09171234567"
-    },
-    schedules: [
-      { day_of_week: "Monday",    start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
-      { day_of_week: "Tuesday",   start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
-      { day_of_week: "Wednesday", start_time: "00:00:00", end_time: "00:00:00", is_available: 0 }
-    ]
-  },
-  {
-    label: "Case 2: Missing optional fields",
-    dentist: {
-      first_name: "Jane", last_name: "Doe", specialization: null,
-      license_number: null, years_of_experience: null, education: null,
-      clinic_name: null, clinic_address: null, clinic_phone: null
-    },
-    schedules: []
-  },
-  {
-    label: "Case 3: Partial schedule (only Friday)",
-    dentist: {
-      first_name: "Bob", last_name: "Lee", specialization: "General",
-      license_number: "LIC999", years_of_experience: 5, education: "DDS",
-      clinic_name: "City Dental", clinic_address: "456 Oak Ave", clinic_phone: "09181112222"
-    },
-    schedules: [
-      { day_of_week: "Friday", start_time: "10:00:00", end_time: "15:00:00", is_available: 1 }
-    ]
-  },
-  {
-    label: "EDGE: Schedule with 00:00:00 times but is_available=1",
-    dentist: {
-      first_name: "Edge", last_name: "Case", specialization: "General",
-      license_number: "LIC000", years_of_experience: 1, education: "DDS",
-      clinic_name: "Edge Clinic", clinic_address: "789 Pine Rd", clinic_phone: "09190000000"
-    },
-    schedules: [
-      { day_of_week: "Monday", start_time: "00:00:00", end_time: "00:00:00", is_available: 1 }
-    ]
-  }
+
+// Dentist information
+const dentistData = {
+  first_name: "John", 
+  last_name: "Smith", 
+  specialization: "Orthodontics",
+  license_number: "LIC123", 
+  years_of_experience: 10, 
+  education: "DMD",
+  clinic_name: "Smile Clinic", 
+  clinic_address: "123 Main St", 
+  clinic_phone: "09171234567"
+};
+
+const schedules = [
+  { day_of_week: "Monday",    start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
+  { day_of_week: "Tuesday",   start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
+  { day_of_week: "Wednesday", start_time: "00:00:00", end_time: "00:00:00", is_available: 0 },
+  { day_of_week: "Thursday",  start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
+  { day_of_week: "Friday",    start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
+  { day_of_week: "Saturday",  start_time: "00:00:00", end_time: "00:00:00", is_available: 0 },
+  { day_of_week: "Sunday",    start_time: "00:00:00", end_time: "00:00:00", is_available: 0 }
 ];
 
 const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-// These two are the "globals" the original function relied on
-let dentistData = testCases[0].dentist;
-let schedules   = testCases[0].schedules;
-
-// ============================================================
-// Helper (unchanged by the refactor)
-// ============================================================
 function formatTime(time) {
   if (!time || time === '00:00:00') return '-';
   let [hour, minute] = time.split(':');
@@ -123,9 +82,6 @@ function formatTime(time) {
   return `${h}:${minute} ${period}`;
 }
 
-// ============================================================
-// BASELINE showDentistProfile() — 31 lines, mixed responsibilities
-// ============================================================
 function showDentistProfile() {
   const d = dentistData;
   let scheduleHtml = '<table class="table table-sm table-bordered mt-2">' +
@@ -157,21 +113,6 @@ function showDentistProfile() {
   document.getElementById('modalProfileContent').innerHTML = profileHtml;
   new bootstrap.Modal(document.getElementById('dentistProfileModal')).show();
 }
-
-// ============================================================
-// Test harness glue
-// ============================================================
-function loadCase(i) {
-  dentistData = testCases[i].dentist;
-  schedules   = testCases[i].schedules;
-  document.getElementById('currentCase').textContent = "Loaded: " + testCases[i].label;
-  document.getElementById('dataPreview').textContent =
-    "dentistData = " + JSON.stringify(dentistData, null, 2) +
-    "\n\nschedules = " + JSON.stringify(schedules, null, 2);
-}
-
-// Initialize
-loadCase(0);
 </script>
 </body>
-</html>
+</html> 
