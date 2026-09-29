@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dentist Profile - Original Design</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  body { padding: 50px; background: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  .profile-card { background: white; border-radius: 10px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+</style>
+</head>
+<body>
+
+<div class="profile-card">
+  <h4 class="mb-4" style="color: #00695C;"><i class="fas fa-tooth me-2"></i> Dentist Information</h4>
+  
+  <div class="d-flex align-items-center p-3 bg-light rounded-3 border">
+    <i class="fas fa-user-md text-primary me-2 fs-4"></i>
+    <div>
+      <span class="fw-bold d-block">Dr. John Smith</span>
+      <span class="text-muted small">Orthodontics</span>
+    </div>
+    <!-- The button that triggers the function -->
+    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill ms-auto" id="viewProfileBtn" onclick="showDentistProfile()">
+      <i class="fas fa-address-card"></i> View Profile
+    </button>
+  </div>
+</div>
+
+<!-- Modal that showDentistProfile() populates -->
+<div class="modal fade" id="dentistProfileModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-0" style="background: linear-gradient(135deg, #00695C 0%, #00897B 100%);">
+        <h5 class="modal-title text-white"><i class="fas fa-user-md me-2"></i> Dentist Profile</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4" id="modalProfileContent"></div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+// Dentist information
+const dentistData = {
+  first_name: "John", 
+  last_name: "Smith", 
+  specialization: "Orthodontics",
+  license_number: "LIC123", 
+  years_of_experience: 10, 
+  education: "DMD",
+  clinic_name: "Smile Clinic", 
+  clinic_address: "123 Main St", 
+  clinic_phone: "09171234567"
+};
+
+const schedules = [
+  { day_of_week: "Monday",    start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
+  { day_of_week: "Tuesday",   start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
+  { day_of_week: "Wednesday", start_time: "00:00:00", end_time: "00:00:00", is_available: 0 },
+  { day_of_week: "Thursday",  start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
+  { day_of_week: "Friday",    start_time: "09:00:00", end_time: "17:00:00", is_available: 1 },
+  { day_of_week: "Saturday",  start_time: "00:00:00", end_time: "00:00:00", is_available: 0 },
+  { day_of_week: "Sunday",    start_time: "00:00:00", end_time: "00:00:00", is_available: 0 }
+];
+
+const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+function formatTime(time) {
+  if (!time || time === '00:00:00') return '-';
+  let [hour, minute] = time.split(':');
+  let period = 'AM';
+  let h = parseInt(hour);
+  if (h >= 12) { period = 'PM'; if (h > 12) h -= 12; }
+  if (h === 0) h = 12;
+  return `${h}:${minute} ${period}`;
+}
+
+// To chect if the day is available or not
+function isWorkingDay(sch) {
+  return sch
+    && sch.is_available == 1
+    && sch.start_time && sch.start_time !== '00:00:00'
+    && sch.end_time   && sch.end_time   !== '00:00:00';
+}
+
+
+// Table for the schedule
+function buildScheduleTableHtml(schedules, daysOrder) {
+  let html = '<table class="table table-sm table-bordered mt-2">' +
+    '<thead><tr><th>Day</th><th>Hours</th></tr></thead><tbody>';
+  daysOrder.forEach(day => {
+    const sch = schedules.find(s => s.day_of_week === day);
+    if (isWorkingDay(sch)) {
+      html += `<tr><td>${day}</td><td>${formatTime(sch.start_time)} - ${formatTime(sch.end_time)}</td></tr>`;
+    } else {
+      html += `<tr><td>${day}</td><td class="text-muted">Not available</td></tr>`;
+    }
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+// Dentist Profile
+
+function buildDentistProfileHtml(d, scheduleHtml) {
+  return `
+    <p><strong>Name:</strong> Dr. ${d.first_name} ${d.last_name}<br>
+    <strong>Specialization:</strong> ${d.specialization || 'General Dentist'}<br>
+    <strong>License:</strong> ${d.license_number || 'N/A'}<br>
+    <strong>Experience:</strong> ${d.years_of_experience || 'N/A'} years<br>
+    <strong>Education:</strong> ${d.education || 'N/A'}</p>
+    <hr>
+    <p><strong>Clinic:</strong> ${d.clinic_name || 'N/A'}<br>
+    <strong>Address:</strong> ${d.clinic_address || 'N/A'}<br>
+    <strong>Phone:</strong> ${d.clinic_phone || 'N/A'}</p>
+    <hr>
+    <h6>Weekly Schedule</h6>
+    ${scheduleHtml}
+  `;
+}
+
+function showDentistProfile() {
+  const scheduleHtml = buildScheduleTableHtml(schedules, daysOrder);
+  const profileHtml  = buildDentistProfileHtml(dentistData, scheduleHtml);
+  
+  document.getElementById('modalProfileContent').innerHTML = profileHtml;
+  new bootstrap.Modal(document.getElementById('dentistProfileModal')).show();
+}
+
+</script>
+</body>
+</html>
